@@ -57,8 +57,8 @@ const UploadModal = () => {
         error: songError,
       } = await supabaseClient
         .storage
-        .from('images')
-        .upload(`image-${values.title}-${uniqID}`, imageFile, {
+        .from('songs')
+        .upload(`song-${values.title}-${uniqID}`, songFile, {
           cacheControl: '3600',
           upsert: false,
         });
@@ -75,8 +75,8 @@ const UploadModal = () => {
         error: imageError,
       } = await supabaseClient
         .storage
-        .from('songs')
-        .upload(`song-${values.title}-${uniqID}`, songFile, {
+        .from('images')
+        .upload(`image-${values.title}-${uniqID}`, imageFile, {
           cacheControl: '3600',
           upsert: false,
         });
