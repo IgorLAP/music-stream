@@ -1,11 +1,13 @@
 'use client'
 
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+
 import LikeButton from "@/components/LikeButton";
 import MediaItem from "@/components/MediaItem";
+import useOnPlay from "@/hooks/useOnPlay";
 import { useUser } from "@/hooks/useUser";
 import { Song } from "@/types";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
 
 interface LikedContentProps {
   songs: Song[];
@@ -14,6 +16,7 @@ interface LikedContentProps {
 const LikedContent: React.FC<LikedContentProps> = ({ songs }) => {
   const router = useRouter();
   const { isLoading, user } = useUser();
+  const onPlay = useOnPlay(songs);
 
   useEffect(() => {
     if (!isLoading && !user) {
@@ -61,7 +64,7 @@ const LikedContent: React.FC<LikedContentProps> = ({ songs }) => {
           <div
             className="flex-1"
           >
-            <MediaItem data={song} onClick={() => { }} />
+            <MediaItem data={song} onClick={(id: string) => onPlay(id)} />
           </div>
           <LikeButton songId={song.id} />
         </div>
