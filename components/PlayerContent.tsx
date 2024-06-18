@@ -21,6 +21,8 @@ const PlayerContent: React.FC<PlayerContentProps> = ({ song, songUrl }) => {
   const player = usePlayer();
   const [volume, setVolume] = useState(1);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [timer, setTimer] = useState(0);
+  const [currentPlayingSongId, setCurrentPlayingSongId] = useState<number>();
 
   const Icon = isPlaying ? BsPauseFill : BsPlayFill;
   const VolumeIcon = !volume ? HiSpeakerXMark : HiSpeakerWave;
@@ -61,7 +63,10 @@ const PlayerContent: React.FC<PlayerContentProps> = ({ song, songUrl }) => {
     songUrl,
     {
       volume,
-      onplay: () => setIsPlaying(true),
+      onplay: (id: number) => {
+        setIsPlaying(true);
+        setCurrentPlayingSongId(id);
+      },
       onend: () => {
         setIsPlaying(false);
         onPlayNext();
@@ -71,8 +76,23 @@ const PlayerContent: React.FC<PlayerContentProps> = ({ song, songUrl }) => {
     }
   );
 
-  // console.log('duration', duration)
-  // console.log('current', sound?.seek())
+  // handle timer change
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (isPlaying) {
+      interval = setInterval(() => {
+        setTimer((prevValue) => prevValue + 1)
+      }, 1000);
+    }
+
+    if (!isPlaying) {
+      if (interval!) clearInterval(interval);
+    }
+
+    return () => {
+      clearInterval(interval)
+    }
+  }, [isPlaying])
 
   useEffect(() => {
     sound?.play();
@@ -98,33 +118,37 @@ const PlayerContent: React.FC<PlayerContentProps> = ({ song, songUrl }) => {
     }
   }
 
+  const VALUE_TIMER = timer ? +(timer.toFixed(2).split('.')[0]) : 0;
+  const MAX_VALUE_TIMER = duration ? +(duration / 1000).toFixed() : 0;
+
   return (
-    <div
-      className="
-        grid grid-cols-2 md:grid-cols-3 h-full
-      "
-    >
+    <div>
       <div
         className="
+        grid grid-cols-2 md:grid-cols-3 h-full
+      "
+      >
+        <div
+          className="
           flex
           w-full
           justify-start
         "
-      >
-        <div
-          className="
+        >
+          <div
+            className="
             flex
             items-center
             gap-x-4
           "
-        >
-          <MediaItem data={song} />
-          <LikeButton songId={song.id} />
+          >
+            <MediaItem data={song} />
+            <LikeButton songId={song.id} />
+          </div>
         </div>
-      </div>
 
-      <div
-        className="
+        <div
+          className="
           flex
           md:hidden
           col-auto
@@ -132,10 +156,10 @@ const PlayerContent: React.FC<PlayerContentProps> = ({ song, songUrl }) => {
           justify-end
           items-center
         "
-      >
-        <div
-          onClick={handlePlay}
-          className="
+        >
+          <div
+            onClick={handlePlay}
+            className="
             h-10
             w-10
             flex
@@ -146,13 +170,27 @@ const PlayerContent: React.FC<PlayerContentProps> = ({ song, songUrl }) => {
             p-1
             cursor-pointer
           "
-        >
-          <Icon size={30} className="text-black" />
+          >
+            <Icon size={30} className="text-black" />
+          </div>
         </div>
-      </div>
 
-      <div
-        className="
+        <div
+          className="
+          hidden
+          md:block
+        "
+        >
+          <Slider
+            value={VALUE_TIMER}
+            maxValue={MAX_VALUE_TIMER}
+            onChange={(value) => {
+              sound?.seek(value, currentPlayingSongId);
+              setTimer(value);
+            }}
+          />
+          <div
+            className="
           hidden
           h-full
           md:flex
@@ -162,20 +200,20 @@ const PlayerContent: React.FC<PlayerContentProps> = ({ song, songUrl }) => {
           max-w-[722px]
           gap-x-6
         "
-      >
-        <AiFillStepBackward
-          onClick={onPlayPrevious}
-          size={30}
-          className="
+          >
+            <AiFillStepBackward
+              onClick={onPlayPrevious}
+              size={30}
+              className="
             text-neutral-400 
             cursor-pointer 
             hover:text-white 
             transition
           "
-        />
-        <div
-          onClick={handlePlay}
-          className="
+            />
+            <div
+              onClick={handlePlay}
+              className="
             flex
             items-center
             justify-center
@@ -186,51 +224,63 @@ const PlayerContent: React.FC<PlayerContentProps> = ({ song, songUrl }) => {
             p-1
             cursor-pointer
           "
-        >
-          <Icon size={30} className="text-black" />
-        </div>
-        <AiFillStepForward
-          onClick={onPlayNext}
-          size={30}
-          className="
+            >
+              <Icon size={30} className="text-black" />
+            </div>
+            <AiFillStepForward
+              onClick={onPlayNext}
+              size={30}
+              className="
             text-neutral-400 
             cursor-pointer 
             hover:text-white 
             transition
           "
-        />
-      </div>
+            />
+          </div>
+        </div>
 
-      <div
-        className="
+        <div
+          className="
           hidden
           md:flex
           w-full
           justify-end
           pr-2
         "
-      >
-        <div
-          className="
+        >
+          <div
+            className="
             flex
             items-center
             gap-x-2
             w-[120px]
           "
-        >
-          <VolumeIcon
-            onClick={toggleMute}
-            size={34}
-            className="cursor-pointer"
-          />
-          <Slider
-            value={volume}
-            onChange={(value) => setVolume(value)}
-          />
+          >
+            <VolumeIcon
+              onClick={toggleMute}
+              size={34}
+              className="cursor-pointer"
+            />
+            <Slider
+              value={volume}
+              onChange={(value) => setVolume(value)}
+            />
+          </div>
         </div>
+
+
       </div>
-
-
+      <div className="block md:hidden mt-1">
+        <Slider
+          value={VALUE_TIMER}
+          maxValue={MAX_VALUE_TIMER}
+          onChange={(value) => {
+            sound?.seek(value, currentPlayingSongId);
+            setTimer(value);
+          }}
+        />
+      </div>
     </div>
   );
 }
