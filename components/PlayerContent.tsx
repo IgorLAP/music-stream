@@ -148,6 +148,8 @@ const PlayerContent: React.FC<PlayerContentProps> = ({ song, songUrl }) => {
             flex
             items-center
             gap-x-4
+            max-w-[260px]
+            sm:max-w-full
           "
           >
             <MediaItem data={song} />
