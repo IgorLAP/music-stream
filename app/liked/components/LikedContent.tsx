@@ -1,28 +1,28 @@
 'use client'
 
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
 
 import LikeButton from "@/components/LikeButton";
 import MediaItem from "@/components/MediaItem";
 import useOnPlay from "@/hooks/useOnPlay";
 import { useUser } from "@/hooks/useUser";
 import { Song } from "@/types";
+import useAuthModal from "@/hooks/useAuthModal";
 
 interface LikedContentProps {
   songs: Song[];
 }
 
 const LikedContent: React.FC<LikedContentProps> = ({ songs }) => {
-  const router = useRouter();
   const { isLoading, user } = useUser();
+  const authModal = useAuthModal();
   const onPlay = useOnPlay(songs);
 
   useEffect(() => {
     if (!isLoading && !user) {
-      router.replace('/')
+      authModal.onOpen();
     }
-  }, [isLoading, user, router]);
+  }, [isLoading, user, authModal.onOpen]);
 
   if (!songs.length) {
     return (
