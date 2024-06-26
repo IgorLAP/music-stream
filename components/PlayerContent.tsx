@@ -118,6 +118,14 @@ const PlayerContent: React.FC<PlayerContentProps> = ({ song, songUrl }) => {
     }
   }
 
+  const getSongMinute = (valueInSeconds: number, isMaxTimer?: boolean) => {
+    let seconds = 0;
+    if (valueInSeconds % 60 !== 0) {
+      seconds = valueInSeconds % 60;
+    }
+    return `${(isMaxTimer ? MAX_VALUE_TIMER / 60 : VALUE_TIMER / 60).toFixed(2).split('.')[0]}:${String(seconds).padStart(2, '0')}`;
+  }
+
   const VALUE_TIMER = timer ? +(timer.toFixed(2).split('.')[0]) : 0;
   const MAX_VALUE_TIMER = duration ? +(duration / 1000).toFixed() : 0;
 
@@ -181,14 +189,20 @@ const PlayerContent: React.FC<PlayerContentProps> = ({ song, songUrl }) => {
           md:block
         "
         >
-          <Slider
-            value={VALUE_TIMER}
-            maxValue={MAX_VALUE_TIMER}
-            onChange={(value) => {
-              sound?.seek(value, currentPlayingSongId);
-              setTimer(value);
-            }}
-          />
+          <div
+            className="flex"
+          >
+            <p className="pr-1 text-xs text-neutral-400">{getSongMinute(VALUE_TIMER)}</p>
+            <Slider
+              value={VALUE_TIMER}
+              maxValue={MAX_VALUE_TIMER}
+              onChange={(value) => {
+                sound?.seek(value, currentPlayingSongId);
+                setTimer(value);
+              }}
+            />
+            <p className="pl-1 text-xs text-neutral-400">{getSongMinute(MAX_VALUE_TIMER, true)}</p>
+          </div>
           <div
             className="
           hidden
@@ -271,7 +285,9 @@ const PlayerContent: React.FC<PlayerContentProps> = ({ song, songUrl }) => {
 
 
       </div>
-      <div className="block md:hidden mt-1">
+      <div className="flex md:hidden mt-1">
+        <p className="pr-1 text-xs text-neutral-400">{getSongMinute(VALUE_TIMER)}</p>
+
         <Slider
           value={VALUE_TIMER}
           maxValue={MAX_VALUE_TIMER}
@@ -280,6 +296,8 @@ const PlayerContent: React.FC<PlayerContentProps> = ({ song, songUrl }) => {
             setTimer(value);
           }}
         />
+        <p className="pl-1 text-xs text-neutral-400">{getSongMinute(MAX_VALUE_TIMER, true)}</p>
+
       </div>
     </div>
   );
