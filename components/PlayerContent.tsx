@@ -73,6 +73,8 @@ const PlayerContent: React.FC<PlayerContentProps> = ({ song, songUrl }) => {
       },
       onpause: () => setIsPlaying(false),
       format: ['mp3'],
+      // howler.js to stream audio or large files
+      html5: true,
     }
   );
 
